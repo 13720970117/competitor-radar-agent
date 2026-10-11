@@ -27,7 +27,16 @@ export async function POST(request: Request) {
       body: JSON.stringify(payload),
       signal: AbortSignal.timeout(timeoutSeconds * 1000),
     });
-    if (!response.ok) throw new Error(`模型服务暂时不可用（${response.status}）`);
+    if (!response.ok) {
+      let detail = '';
+      try {
+        const failure = await response.json() as { error?: { message?: string }; message?: string };
+        detail = failure.error?.message || failure.message || '';
+      } catch {
+        detail = '';
+      }
+      throw new Error(`模型服务暂时不可用（${response.status}${detail ? `：${detail.slice(0, 120)}` : ''}）`);
+    }
     const raw = await response.json() as Record<string, unknown>;
     const analysis = normalize(parse(extractText(raw)), input.competitors);
     return Response.json({ analysis });
