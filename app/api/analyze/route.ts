@@ -49,8 +49,18 @@ export async function POST(request: Request) {
 }
 
 function decodeSecret(value: string) {
-  const candidate = value.length % 4 === 0 ? value : value.slice(1, -1);
-  return atob(candidate);
+  const cleaned = value.replace(/[^A-Za-z0-9+/=]/g, '');
+  for (let start = 0; start < cleaned.length; start += 1) {
+    for (let end = start + 4; end <= cleaned.length; end += 4) {
+      try {
+        const decoded = atob(cleaned.slice(start, end));
+        if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(decoded)) return decoded;
+      } catch {
+        // Continue scanning because hosted secret stores may add a wrapper.
+      }
+    }
+  }
+  throw new Error('服务端密钥解码失败');
 }
 
 function verifyOrigin(request: Request) {
