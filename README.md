@@ -4,7 +4,9 @@
 
 ## 在线体验
 
-<https://competitor-radar-agent.muddycreek16.chatgpt.site/>
+<https://competitor-radar-agent.netlify.app/>
+
+备用地址：<https://competitor-radar-agent.13720970117-b7e.workers.dev/>
 
 ## 技术实现
 
@@ -44,3 +46,22 @@ API Key 只放在本地环境变量或托管平台 Secret 中，不要提交到 
 npm run build
 npx oxlint app vite.config.ts
 ```
+
+## 部署到 Cloudflare Workers
+
+```bash
+npx wrangler login
+npx wrangler secret put AI_API_KEY --name competitor-radar-agent
+npm run deploy:cloudflare
+```
+
+模型地址、模型 ID 和超时时间在 `wrangler.jsonc` 中维护，API Key 只存放在 Cloudflare Secret 中。
+
+## 部署到 Netlify
+
+```bash
+npx netlify-cli login
+npx netlify-cli deploy --prod
+```
+
+Netlify 使用 `netlify.toml` 和 Next.js 构建，`AI_API_KEY` 必须保存为托管平台环境变量。

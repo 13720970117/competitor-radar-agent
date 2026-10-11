@@ -1,5 +1,3 @@
-import { env } from 'cloudflare:workers';
-
 type Relation = 'direct' | 'indirect' | 'substitute';
 type Competitor = { name: string; relation: Relation; url: string; notes: string };
 type Input = { competitors: Competitor[]; analysisGoal: 'differentiation' | 'feature' | 'market' | 'business' };
@@ -13,8 +11,7 @@ export async function POST(request: Request) {
     enforceRateLimit(request);
     if (!request.headers.get('content-type')?.includes('application/json')) throw new Error('请求格式不正确');
     const input = validate(await request.json());
-    const runtime = env as unknown as Record<string, string | undefined>;
-    const readRuntime = (key: string) => process.env[key]?.trim() || runtime[key]?.trim();
+    const readRuntime = (key: string) => process.env[key]?.trim();
     const encodedKey = readRuntime('AI_API_KEY_B64');
     const apiKey = encodedKey ? decodeSecret(encodedKey) : readRuntime('AI_API_KEY');
     const model = readRuntime('AI_MODEL');
