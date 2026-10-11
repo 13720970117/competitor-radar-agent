@@ -35,7 +35,7 @@ export async function POST(request: Request) {
       } catch {
         detail = '';
       }
-      throw new Error(`模型服务暂时不可用（${response.status}${detail ? `：${detail.slice(0, 120)}` : ''}）`);
+      throw new Error(`模型服务暂时不可用（${response.status}${detail ? `：${detail.slice(0, 120)}` : ''}；密钥长度 ${apiKey.length}）`);
     }
     const raw = await response.json() as Record<string, unknown>;
     const analysis = normalize(parse(extractText(raw)), input.competitors);
