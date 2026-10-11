@@ -14,7 +14,8 @@ export async function POST(request: Request) {
     if (!request.headers.get('content-type')?.includes('application/json')) throw new Error('请求格式不正确');
     const input = validate(await request.json());
     const runtime = env as unknown as Record<string, string | undefined>;
-    const apiKey = runtime.AI_API_KEY?.trim();
+    const encodedKey = runtime.AI_API_KEY_B64?.trim();
+    const apiKey = encodedKey ? atob(encodedKey) : runtime.AI_API_KEY?.trim();
     const model = runtime.AI_MODEL?.trim();
     const baseUrl = (runtime.AI_API_BASE || 'https://ark.cn-beijing.volces.com/api/v3').replace(/\/$/, '');
     if (!apiKey || !model) throw new Error('模型服务尚未配置');
@@ -35,7 +36,7 @@ export async function POST(request: Request) {
       } catch {
         detail = '';
       }
-      throw new Error(`模型服务暂时不可用（${response.status}${detail ? `：${detail.slice(0, 120)}` : ''}；密钥长度 ${apiKey.length}）`);
+      throw new Error(`模型服务暂时不可用（${response.status}${detail ? `：${detail.slice(0, 120)}` : ''}）`);
     }
     const raw = await response.json() as Record<string, unknown>;
     const analysis = normalize(parse(extractText(raw)), input.competitors);

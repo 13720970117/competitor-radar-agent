@@ -16,7 +16,7 @@ const localBindingConfig = {
   main: 'vinext/server/fetch-handler',
   compatibility_flags: ['nodejs_compat'],
   vars: Object.fromEntries(
-    ['AI_API_BASE', 'AI_API_KEY', 'AI_MODEL', 'AI_TIMEOUT_SECONDS', 'AI_REASONING_EFFORT']
+    ['AI_API_BASE', 'AI_API_KEY', 'AI_API_KEY_B64', 'AI_MODEL', 'AI_TIMEOUT_SECONDS', 'AI_REASONING_EFFORT']
       .map((key) => [key, process.env[key]])
       .filter((entry): entry is [string, string] => Boolean(entry[1])),
   ),
