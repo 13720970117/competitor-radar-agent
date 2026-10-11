@@ -14,14 +14,15 @@ export async function POST(request: Request) {
     if (!request.headers.get('content-type')?.includes('application/json')) throw new Error('请求格式不正确');
     const input = validate(await request.json());
     const runtime = env as unknown as Record<string, string | undefined>;
-    const encodedKey = runtime.AI_API_KEY_B64?.trim();
-    const apiKey = encodedKey ? decodeSecret(encodedKey) : runtime.AI_API_KEY?.trim();
-    const model = runtime.AI_MODEL?.trim();
-    const baseUrl = (runtime.AI_API_BASE || 'https://ark.cn-beijing.volces.com/api/v3').replace(/\/$/, '');
+    const readRuntime = (key: string) => process.env[key]?.trim() || runtime[key]?.trim();
+    const encodedKey = readRuntime('AI_API_KEY_B64');
+    const apiKey = encodedKey ? decodeSecret(encodedKey) : readRuntime('AI_API_KEY');
+    const model = readRuntime('AI_MODEL');
+    const baseUrl = (readRuntime('AI_API_BASE') || 'https://ark.cn-beijing.volces.com/api/v3').replace(/\/$/, '');
     if (!apiKey || !model) throw new Error('模型服务尚未配置');
-    const timeoutSeconds = Math.min(Math.max(Number(runtime.AI_TIMEOUT_SECONDS) || 180, 20), 300);
+    const timeoutSeconds = Math.min(Math.max(Number(readRuntime('AI_TIMEOUT_SECONDS')) || 180, 20), 300);
     const payload: Record<string, unknown> = { model, input: buildPrompt(input) };
-    if (baseUrl.includes('volces.com')) payload.reasoning = { effort: runtime.AI_REASONING_EFFORT || 'minimal' };
+    if (baseUrl.includes('volces.com')) payload.reasoning = { effort: readRuntime('AI_REASONING_EFFORT') || 'minimal' };
     const response = await fetch(`${baseUrl}/responses`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
