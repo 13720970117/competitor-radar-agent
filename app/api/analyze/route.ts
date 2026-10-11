@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     const input = validate(await request.json());
     const runtime = env as unknown as Record<string, string | undefined>;
     const encodedKey = runtime.AI_API_KEY_B64?.trim();
-    const apiKey = encodedKey ? atob(encodedKey) : runtime.AI_API_KEY?.trim();
+    const apiKey = encodedKey ? decodeSecret(encodedKey) : runtime.AI_API_KEY?.trim();
     const model = runtime.AI_MODEL?.trim();
     const baseUrl = (runtime.AI_API_BASE || 'https://ark.cn-beijing.volces.com/api/v3').replace(/\/$/, '');
     if (!apiKey || !model) throw new Error('模型服务尚未配置');
@@ -46,6 +46,11 @@ export async function POST(request: Request) {
     const status = message.includes('频繁') ? 429 : message.includes('来源') ? 403 : 400;
     return Response.json({ error: message }, { status });
   }
+}
+
+function decodeSecret(value: string) {
+  const candidate = value.length % 4 === 0 ? value : value.slice(1, -1);
+  return atob(candidate);
 }
 
 function verifyOrigin(request: Request) {
