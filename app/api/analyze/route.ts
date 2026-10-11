@@ -60,7 +60,7 @@ function decodeSecret(value: string) {
       }
     }
   }
-  throw new Error('服务端密钥解码失败');
+  throw new Error(`服务端密钥解码失败（编码长度 ${cleaned.length}）`);
 }
 
 function verifyOrigin(request: Request) {
