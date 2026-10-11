@@ -21,7 +21,12 @@ export async function POST(request: Request) {
     const baseUrl = (readRuntime('AI_API_BASE') || 'https://ark.cn-beijing.volces.com/api/v3').replace(/\/$/, '');
     if (!apiKey || !model) throw new Error('模型服务尚未配置');
     const timeoutSeconds = Math.min(Math.max(Number(readRuntime('AI_TIMEOUT_SECONDS')) || 180, 20), 300);
-    const payload: Record<string, unknown> = { model, input: buildPrompt(input) };
+    const payload: Record<string, unknown> = {
+      model,
+      input: buildPrompt(input),
+      max_output_tokens: 6000,
+      text: { format: { type: 'json_object' } },
+    };
     if (baseUrl.includes('volces.com')) payload.reasoning = { effort: readRuntime('AI_REASONING_EFFORT') || 'minimal' };
     const response = await fetch(`${baseUrl}/responses`, {
       method: 'POST',
@@ -61,7 +66,7 @@ function decodeSecret(value: string) {
       }
     }
   }
-  throw new Error(`服务端密钥解码失败（编码长度 ${cleaned.length}）`);
+  throw new Error('服务端密钥解码失败');
 }
 
 function verifyOrigin(request: Request) {
